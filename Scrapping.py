@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
 
-with open("https://digitalcomicmuseum.com") as f:
-    soup = BeautifulSoup(f,'html.parser')
+lien = 'https://digitalcomicmuseum.com'
+page = requests.get(lien)
+soup = BeautifulSoup(page.text,'html.parser')
