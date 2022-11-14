@@ -2,6 +2,8 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+import time
+import requests
 
 def login():
     driver.get("https://digitalcomicmuseum.com/login.php")
@@ -15,9 +17,20 @@ def login():
     submit.click()
 driver = webdriver.Firefox()
 login()
-driver.get("https://digitalcomicmuseum.com/index.php?dlid=18772")
-temp = driver.find_element(By.XPATH, "/html/body/table[2]/tbody/tr/td/div[1]/div[1]/table/tbody/tr[2]/td[2]/table/tbody/tr/td[4]/div/a/img")
-temp.click()
+url = "https://digitalcomicmuseum.com/index.php?dlid="
+for i in range(1000,1200):
+    try :
+        new_url = url + str(i)
+        driver.get(new_url)
+        #driver.get("https://digitalcomicmuseum.com/index.php?dlid=18772")
+        temp = driver.find_element(By.XPATH, "/html/body/table[2]/tbody/tr/td/div[1]/div[1]/table/tbody/tr[2]/td[2]/table/tbody/tr/td[4]/div/a/img")
+
+    except :
+        continue
+    temp.click()
+    time.sleep(20)
+
+
 
 """
 url = "https://digitalcomicmuseum.com/index.php?dlid="
