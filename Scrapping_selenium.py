@@ -43,4 +43,4 @@ for i in range(50000):
 #print(driver.title)
 """
 driver.close()
-# <a href="index.php?cid=962">DCM Archives and Collections</a>
+# <a href="index.php?cid=962">DCM Archives and Collections</a> C:\Users\jeronimo\Downloads\000.jpg
