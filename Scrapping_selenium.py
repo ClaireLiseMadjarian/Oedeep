@@ -4,16 +4,18 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import time
 import requests
-import subprocess
+import bs4
 
-from os import listdir
-from os.path import isfile, join
-
-def get_genre():
-    cellule = driver.find_element(By.XPATH, '//*[@id="catname"]')
-    txt = cellule.text
-    genre = txt.split("Search Results for the Genre: ")[1].split(" (sortable)")[0]
-    return(genre)
+def get_dico_genres():
+    dico={}
+    for id in range(1, 36):
+        url=f'https://digitalcomicmuseum.com/index.php?ACT=dogenresearch&terms={id}'
+        driver.get(url)
+        cellule = driver.find_element(By.XPATH, '//*[@id="catname"]')
+        txt = cellule.text
+        genre = txt.split("Search Results for the Genre: ")[1].split(" (sortable)")[0]
+        dico[id] = genre
+    return(dico)
 
 def login():
     driver.get("https://digitalcomicmuseum.com/login.php")
@@ -50,27 +52,47 @@ def get_files_by_genre(id):
     while(True):
         try :
             path = "/html/body/table[2]/tbody/tr/td/div[1]/div/table/tbody[1]/tr["+ str(i)+ "]/td[1]/a"
+            try:
+                list_pages = driver.find_elements(By.TAG_NAME, 'td')
+            except:
+                pass
+
             link = driver.find_element(By.XPATH, path)
             link.click()
             temp = driver.find_element(By.XPATH,
                                        "/html/body/table[2]/tbody/tr/td/div[1]/div[1]/table/tbody/tr[2]/td[2]/table/tbody/tr/td[4]/div/a/img")
             temp.click()
             time.sleep(20)
-
-
-
             i+=1
             driver.get(url)
         except:
             break
 
-
-
+def genres_nbpages(url):
+    page = requests.get(url)
+    soup = bs4.BeautifulSoup(page.text, 'html.parser')
+    pages = soup.find_all("td", {'width': '175'})
+    nb_pages = []
+    bd_genres = []
+    for p in pages:
+        t = p.text
+        gen = t.rsplit(' (',1)[0]
+        nb = t.split('(')[1].split(')')[0]
+        nb_pages.append(nb)
+        bd_genres.append(gen)
+    return bd_genres, nb_pages
 
 driver = webdriver.Firefox()
 login()
-get_files_by_genre(1)
-"""
+
+get_dico_genres()
+
+driver.close()
+
+
+
+
+"""'
 url = "https://digitalcomicmuseum.com/index.php?dlid="
 for i in range(50000):
     new_url = url + str(i)
@@ -80,8 +102,4 @@ for i in range(50000):
 # element.send_keys( Keys.ARROW_DOWN)
 #print(driver.title)
 """
-driver.close()
-
-def extract_file(filename, dict):
-    pass
 # <a href="index.php?cid=962">DCM Archives and Collections</a> C:\Users\jeronimo\Downloads\000.jpg
