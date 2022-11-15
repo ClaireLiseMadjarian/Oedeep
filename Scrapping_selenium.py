@@ -89,7 +89,9 @@ get_dico_genres()
 
 driver.close()
 
+def extract_comic(filename, bd_genres, nb_pages):
 
+    pass
 
 
 """'
