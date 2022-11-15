@@ -3,4 +3,6 @@ import requests
 
 lien = 'https://digitalcomicmuseum.com'
 page = requests.get(lien)
-soup = BeautifulSoup(page.text,'html.parser')
+soup = BeautifulSoup(page.text, 'html.parser')
+print(soup.head)
+

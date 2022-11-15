@@ -5,6 +5,12 @@ from selenium.webdriver.common.by import By
 import time
 import requests
 
+
+def get_genre():
+    cellule = driver.find_element(By.XPATH, '//*[@id="catname"]')
+    txt = cellule.text
+    genre = txt.split("Search Results for the Genre: ")[1].split(" (sortable)")[0]
+    return(genre)
 def login():
     driver.get("https://digitalcomicmuseum.com/login.php")
     username = driver.find_element(By.XPATH, '//*[@id="user"]')
@@ -17,11 +23,15 @@ def login():
     submit.click()
 driver = webdriver.Firefox()
 login()
-url = "https://digitalcomicmuseum.com/index.php?dlid="
-for i in range(1000,1200):
-    try :
-        new_url = url + str(i)
-        driver.get(new_url)
+url="https://digitalcomicmuseum.com/index.php?ACT=dogenresearch&terms=2"
+driver.get(url)
+get_genre()
+
+"""url = "https://digitalcomicmuseum.com/index.php?dlid="
+"for i in range(1000,1200):
+   " try :
+       new_url = url + str(i)
+       driver.get(new_url)
         #driver.get("https://digitalcomicmuseum.com/index.php?dlid=18772")
         temp = driver.find_element(By.XPATH, "/html/body/table[2]/tbody/tr/td/div[1]/div[1]/table/tbody/tr[2]/td[2]/table/tbody/tr/td[4]/div/a/img")
 
@@ -29,6 +39,7 @@ for i in range(1000,1200):
         continue
     temp.click()
     time.sleep(20)
+"""
 
 
 
@@ -43,4 +54,4 @@ for i in range(50000):
 #print(driver.title)
 """
 driver.close()
-# <a href="index.php?cid=962">DCM Archives and Collections</a> C:\Users\jeronimo\Downloads\000.jpg
+# <a href="index.php?cid=962">DCM Archives and Collections</a>
