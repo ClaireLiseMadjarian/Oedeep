@@ -4,18 +4,12 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import time
 import requests
-import bs4
 
-def get_list_genres():
-    Liste_genres=[]
-    for id in range(1, 36):
-        url=f'https://digitalcomicmuseum.com/index.php?ACT=dogenresearch&terms={id}'
-        driver.get(url)
-        cellule = driver.find_element(By.XPATH, '//*[@id="catname"]')
-        txt = cellule.text
-        genre = txt.split("Search Results for the Genre: ")[1].split(" (sortable)")[0]
-        Liste_genres.append(genre)
-    return(Liste_genres)
+def get_genre():
+    cellule = driver.find_element(By.XPATH, '//*[@id="catname"]')
+    txt = cellule.text
+    genre = txt.split("Search Results for the Genre: ")[1].split(" (sortable)")[0]
+    return(genre)
 
 def login():
     driver.get("https://digitalcomicmuseum.com/login.php")
@@ -52,11 +46,6 @@ def get_files_by_genre(id):
     while(True):
         try :
             path = "/html/body/table[2]/tbody/tr/td/div[1]/div/table/tbody[1]/tr["+ str(i)+ "]/td[1]/a"
-            try:
-                list_pages = driver.find_elements(By.TAG_NAME, 'td')
-            except:
-                pass
-
             link = driver.find_element(By.XPATH, path)
             link.click()
             temp = driver.find_element(By.XPATH,
@@ -68,21 +57,13 @@ def get_files_by_genre(id):
         except:
             break
 
-def genres_nbpages(url):
-    page = requests.get(url)
-    soup = bs4.BeautifulSoup(page.text, 'html.parser')
-    pages = soup.find_all("td", {'width': '175'})
-    nb_pages = []
-    bd_genres = []
-    for p in pages:
-        t = p.text
-        gen = t.rsplit(' (',1)[0]
-        nb = t.split('(')[1].split(')')[0]
-        nb_pages.append(nb)
-        bd_genres.append(gen)
-    return bd_genres, nb_pages
 
-"""'
+
+
+driver = webdriver.Firefox()
+login()
+get_files_by_genre(1)
+"""
 url = "https://digitalcomicmuseum.com/index.php?dlid="
 for i in range(50000):
     new_url = url + str(i)
@@ -92,4 +73,5 @@ for i in range(50000):
 # element.send_keys( Keys.ARROW_DOWN)
 #print(driver.title)
 """
+driver.close()
 # <a href="index.php?cid=962">DCM Archives and Collections</a> C:\Users\jeronimo\Downloads\000.jpg
