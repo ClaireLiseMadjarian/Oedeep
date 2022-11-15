@@ -4,6 +4,10 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import time
 import requests
+import subprocess
+
+from os import listdir
+from os.path import isfile, join
 
 def get_genre():
     cellule = driver.find_element(By.XPATH, '//*[@id="catname"]')
@@ -52,6 +56,9 @@ def get_files_by_genre(id):
                                        "/html/body/table[2]/tbody/tr/td/div[1]/div[1]/table/tbody/tr[2]/td[2]/table/tbody/tr/td[4]/div/a/img")
             temp.click()
             time.sleep(20)
+
+
+
             i+=1
             driver.get(url)
         except:
@@ -74,4 +81,7 @@ for i in range(50000):
 #print(driver.title)
 """
 driver.close()
+
+def extract_file(filename, dict):
+    pass
 # <a href="index.php?cid=962">DCM Archives and Collections</a> C:\Users\jeronimo\Downloads\000.jpg
