@@ -14,7 +14,7 @@ def get_dico_genres():
         cellule = driver.find_element(By.XPATH, '//*[@id="catname"]')
         txt = cellule.text
         genre = txt.split("Search Results for the Genre: ")[1].split(" (sortable)")[0]
-        dico[id] = genre
+        dico[genre] = id
     return(dico)
 
 def login():
