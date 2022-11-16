@@ -14,7 +14,7 @@ id = 0
 df = pd.DataFrame(columns=["id_img", "labels"])
 
 
-def get_dico_genres():
+def get_dico_genres(driver):
     dico = {}
     for id in range(1, 36):
         url = f'https://digitalcomicmuseum.com/index.php?ACT=dogenresearch&terms={id}'
@@ -26,7 +26,7 @@ def get_dico_genres():
     return (dico)
 
 
-def login():
+def login(driver):
     driver.get("https://digitalcomicmuseum.com/login.php")
     username = driver.find_element(By.XPATH, '//*[@id="user"]')
     username.clear()
@@ -38,7 +38,7 @@ def login():
     submit.click()
 
 
-def get_all_files():
+def get_all_files(driver):
     url = "https://digitalcomicmuseum.com/index.php?dlid="
     for i in range(1000, 1200):
         try:
@@ -54,7 +54,7 @@ def get_all_files():
         time.sleep(20)
 
 
-def get_files_by_genre(id):
+def get_files_by_genre(id, driver):
     url = "https://digitalcomicmuseum.com/index.php?ACT=dogenresearch&terms=" + str(id)
     driver.get(url)
     i = 1
@@ -96,16 +96,21 @@ def genres_nbpages(url):
     return bd_genres, nb_pages
 
 
-profile = webdriver.FirefoxProfile()
-profile.set_preference("browser.download.folderList", 2)
-profile.set_preference("browser.download.dir",
-                       r"C:\Users\jeronimo\OneDrive - IMT MINES ALES\Documents\3A\Oedeep\cbr_files")
-driver = webdriver.Firefox(firefox_profile=profile)
-login()
 
-get_dico_genres()
+def scrap() :
+    profile = webdriver.FirefoxProfile()
+    profile.set_preference("browser.download.folderList", 2)
+    profile.set_preference("browser.download.dir",
+                           r"C:\Users\jeronimo\OneDrive - IMT MINES ALES\Documents\3A\Oedeep\cbr_files")
+    driver = webdriver.Firefox(firefox_profile=profile)
+    login(driver)
 
-driver.close()
+    get_dico_genres(driver)
+    for i in range(1,35):
+        get_files_by_genre(i,driver)
+
+
+    driver.close()
 
 
 def extract_comic(filename, bd_genres, pages):
