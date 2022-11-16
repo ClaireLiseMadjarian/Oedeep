@@ -70,11 +70,18 @@ def get_files_by_genre(id, driver):
             link.click()
             temp = driver.find_element(By.XPATH,
                                        "/html/body/table[2]/tbody/tr/td/div[1]/div[1]/table/tbody/tr[2]/td[2]/table/tbody/tr/td[4]/div/a/img")
+            before = os.listdir(".\cbr_files")
             temp.click()
             time.wait(20)
             # TODO complete file_path with filename
             # wait_download(file_path)
-            extract_comic()
+            after = os.listdir(".\cbr_files")
+            change = set(after) - set(before)
+            if len(change) == 1:
+                file_name = change.pop()
+            else :
+                raise FileNotFoundError("unable to find downloaded file")
+            extract_comic(file_name)
             i += 1
             driver.get(url)
         except:
@@ -105,7 +112,7 @@ def scrap() :
     driver = webdriver.Firefox(firefox_profile=profile)
     login(driver)
 
-    get_dico_genres(driver)
+    dico = get_dico_genres(driver)
     for i in range(1,35):
         get_files_by_genre(i,driver)
 
