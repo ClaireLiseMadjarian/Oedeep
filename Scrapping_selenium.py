@@ -13,7 +13,7 @@ import pandas as pd
 
 
 id = 0
-df =pd.DataFrame(columns=["id"])
+df =pd.DataFrame(columns=["id_img", "labels"])
 
 def get_dico_genres():
     dico={}
@@ -72,6 +72,7 @@ def get_files_by_genre(id):
                                        "/html/body/table[2]/tbody/tr/td/div[1]/div[1]/table/tbody/tr[2]/td[2]/table/tbody/tr/td[4]/div/a/img")
             temp.click()
             time.sleep(20)
+            extract_comic()
             i+=1
             driver.get(url)
         except:
@@ -90,6 +91,8 @@ def genres_nbpages(url):
         nb_pages.append(nb)
         bd_genres.append(gen)
     return bd_genres, nb_pages
+
+
 profile = webdriver.FirefoxProfile()
 profile.set_preference("browser.download.folderList", 2)
 profile.set_preference("browser.download.dir", r"C:\Users\jeronimo\OneDrive - IMT MINES ALES\Documents\3A\Oedeep\cbr_files")
@@ -101,6 +104,7 @@ get_dico_genres()
 driver.close()
 
 def extract_comic(filename, bd_genres, nb_pages):
+    global id
     command = '7z e ".\cbr_files\\' + filename + '" -o".\jpg_files" -y'
     subprocess.run(
         command,
