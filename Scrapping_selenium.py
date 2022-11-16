@@ -12,6 +12,9 @@ import subprocess
 import pandas as pd
 
 
+id = 0
+df =pd.DataFrame(columns=["id"])
+
 def get_dico_genres():
     dico={}
     for id in range(1, 36):
@@ -102,6 +105,7 @@ def extract_comic(filename, bd_genres, nb_pages):
     subprocess.run(
         command,
         shell=True)
+    del_files()
     pass
 
 def del_files():
@@ -109,6 +113,7 @@ def del_files():
     onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
     for file in onlyfiles:
         os.remove(file)
+
 """'
 url = "https://digitalcomicmuseum.com/index.php?dlid="
 for i in range(50000):
