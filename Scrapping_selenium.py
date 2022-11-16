@@ -156,8 +156,8 @@ def wait_download(file_path):
         pass
     else:
         raise ValueError("%s isn't a file!" % file_path)
-
-
+scrap()
+df.to_csv("labels.csv")
 """'
 url = "https://digitalcomicmuseum.com/index.php?dlid="
 for i in range(50000):
