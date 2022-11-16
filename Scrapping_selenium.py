@@ -71,7 +71,9 @@ def get_files_by_genre(id):
             temp = driver.find_element(By.XPATH,
                                        "/html/body/table[2]/tbody/tr/td/div[1]/div[1]/table/tbody/tr[2]/td[2]/table/tbody/tr/td[4]/div/a/img")
             temp.click()
-            time.sleep(20)
+            time.wait(20)
+            #TODO complete file_path with filename
+            #wait_download(file_path)
             extract_comic()
             i+=1
             driver.get(url)
@@ -117,6 +119,15 @@ def del_files():
     onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
     for file in onlyfiles:
         os.remove(file)
+
+def wait_download(file_path):
+    while not os.path.exists(file_path):
+        time.sleep(1)
+
+    if os.path.isfile(file_path):
+        pass
+    else:
+        raise ValueError("%s isn't a file!" % file_path)
 
 """'
 url = "https://digitalcomicmuseum.com/index.php?dlid="
