@@ -5,6 +5,12 @@ from selenium.webdriver.common.by import By
 import time
 import requests
 import bs4
+import os
+from os import listdir
+from os.path import isfile, join
+import subprocess
+import pandas as pd
+
 
 def get_dico_genres():
     dico={}
@@ -81,8 +87,10 @@ def genres_nbpages(url):
         nb_pages.append(nb)
         bd_genres.append(gen)
     return bd_genres, nb_pages
-
-driver = webdriver.Firefox()
+profile = webdriver.FirefoxProfile()
+profile.set_preference("browser.download.folderList", 2)
+profile.set_preference("browser.download.dir", r"C:\Users\jeronimo\OneDrive - IMT MINES ALES\Documents\3A\Oedeep\cbr_files")
+driver = webdriver.Firefox(firefox_profile=profile)
 login()
 
 get_dico_genres()
@@ -90,10 +98,17 @@ get_dico_genres()
 driver.close()
 
 def extract_comic(filename, bd_genres, nb_pages):
-
+    command = '7z e ".\cbr_files\\' + filename + '" -o".\jpg_files" -y'
+    subprocess.run(
+        command,
+        shell=True)
     pass
 
-
+def del_files():
+    mypath = r'C:\Users\jeronimo\OneDrive - IMT MINES ALES\Documents\3A\Oedeep\cbr_files'
+    onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+    for file in onlyfiles:
+        os.remove(file)
 """'
 url = "https://digitalcomicmuseum.com/index.php?dlid="
 for i in range(50000):
