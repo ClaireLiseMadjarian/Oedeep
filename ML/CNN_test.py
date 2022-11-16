@@ -21,11 +21,7 @@ print(len(dataset))
 
 # Data
 # Train and test dataloaders: ....
-train_dataset, test_dataset = torch.utils.data.random_split(dataset, [len(dataset)-500, 500],
-                                                            generator=torch.Generator().manual_seed(631))
 
-train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=8, shuffle=True)
-test_dataloader  = torch.utils.data.DataLoader(test_dataset,  batch_size=8, shuffle=False)
 
 # # Exploratory stats
 # # Iterating over the training dataset and storing the target class for each sample
@@ -62,7 +58,7 @@ class CNNNetwork(nn.Module):
         return self.model(input_data)
 
 
-def train_optim(model, epochs, log_frequency, device, learning_rate=1e-1):
+def train_optim(model, epochs, log_frequency, device, learning_rate=1e-3):
     model.to(device)  # we make sure the model is on the proper device
 
     # Multiclass classification setting, we use cross-entropy
@@ -123,6 +119,16 @@ device = torch.device("cuda:0")
 
 #%%
 
+train_dataset, test_dataset = torch.utils.data.random_split(dataset, [len(dataset)-500, 500],
+                                                            generator=torch.Generator().manual_seed(631))
+
+batch_size = 32
+
+train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size, shuffle=True)
+test_dataloader  = torch.utils.data.DataLoader(test_dataset,  batch_size, shuffle=False)
+
 model = CNNNetwork()
 
-train_optim(model, 10, 100, "cuda")
+train_optim(model, 10, 100, "cuda", lr=1e-3)
+
+torch.save(model, "model.torch")
