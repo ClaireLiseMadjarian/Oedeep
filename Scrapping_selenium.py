@@ -123,9 +123,13 @@ def get_files_by_genre(id, driver, dico, df):
         if len(change) == 1:
             file_name = change.pop()
         else:
-            raise FileNotFoundError("unable to find downloaded file")
+            i+=1
+            del_files()
+            continue
+            # raise FileNotFoundError("unable to find downloaded file")
         df = extract_comic(file_name, bd_genres, pages, df)
         i += 1
+    return df
 
 
 
@@ -156,9 +160,10 @@ def scrap(df):
 
     dico = get_dico_genres(driver)
     for i in range(1, 35):
-        get_files_by_genre(i, driver, dico, df)
+        df = get_files_by_genre(i, driver, dico, df)
 
     driver.close()
+    return df
 
 
 def extract_comic(filename, bd_genres, pages, df):
@@ -205,7 +210,7 @@ def del_files():
         os.remove(os.path.join(mypath, file))
 
 
-def wait_download(directory, timeout=100):
+def wait_download(directory, timeout=120):
     seconds = 0
     dl_wait = True
     while dl_wait and seconds < timeout:
