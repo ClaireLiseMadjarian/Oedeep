@@ -16,13 +16,16 @@ df = pd.DataFrame(columns=["id_img", "labels"])
 
 def get_dico_genres(driver):
     dico = {}
-    for id in range(1, 36):
-        url = f'https://digitalcomicmuseum.com/index.php?ACT=dogenresearch&terms={id}'
-        driver.get(url)
-        cellule = driver.find_element(By.XPATH, '//*[@id="catname"]')
-        txt = cellule.text
-        genre = txt.split("Search Results for the Genre: ")[1].split(" (sortable)")[0]
-        dico[genre] = id
+    for id in range(1, 41):
+        try:
+            url = f'https://digitalcomicmuseum.com/index.php?ACT=dogenresearch&terms={id}'
+            driver.get(url)
+            cellule = driver.find_element(By.XPATH, '//*[@id="catname"]')
+            txt = cellule.text
+            genre = txt.split("Search Results for the Genre: ")[1].split(" (sortable)")[0]
+            dico[genre] = id
+        except:
+            pass
     return (dico)
 
 
@@ -54,41 +57,79 @@ def get_all_files(driver):
         time.sleep(20)
 
 
-def get_files_by_genre(id, driver):
-    url = "https://digitalcomicmuseum.com/index.php?ACT=dogenresearch&terms=" + str(id)
-    driver.get(url)
+def get_files_by_genre(id, driver, dico, df):
     i = 1
     while (True):
+        url = "https://digitalcomicmuseum.com/index.php?ACT=dogenresearch&terms=" + str(id)
+        driver.get(url)
         try:
             path = "/html/body/table[2]/tbody/tr/td/div[1]/div/table/tbody[1]/tr[" + str(i) + "]/td[1]/a"
-            try:
-                list_pages = driver.find_elements(By.TAG_NAME, 'td')
-            except:
-                pass
-
             link = driver.find_element(By.XPATH, path)
             link.click()
             temp = driver.find_element(By.XPATH,
                                        "/html/body/table[2]/tbody/tr/td/div[1]/div[1]/table/tbody/tr[2]/td[2]/table/tbody/tr/td[4]/div/a/img")
-            before = os.listdir(".\cbr_files")
-            temp.click()
-            time.wait(20)
-            # TODO complete file_path with filename
-            # wait_download(file_path)
-            after = os.listdir(".\cbr_files")
-            change = set(after) - set(before)
-            if len(change) == 1:
-                file_name = change.pop()
-            else :
-                raise FileNotFoundError("unable to find downloaded file")
-            extract_comic(file_name)
-            i += 1
-            driver.get(url)
         except:
             break
+        before = os.listdir(".\cbr_files")
+
+        bd_genres, pages = [], []
+        j = 1
+        nb_pages = 1
+        while True:
+            try:
+                table = driver.find_element(By.XPATH,
+                                            "/html/body/table[2]/tbody/tr/td/div[1]/div[2]/table/tbody/tr/td/table/tbody/tr[3]/td/table[" + str(
+                                                j) + "]")
+            except:
+                break
+
+            content = table.text.split()
+            if "page)" in content:
+                id_page = content.index("page)") - 1
+            else:
+                id_page = content.index("pages)") - 1
+
+            pages.append([nb_pages, int(content[id_page][1:]) + nb_pages - 1])
+            nb_pages += int(content[id_page][1:])
+            try:
+                if "Genre:" in table.text:
+                    g = []
+                    for key in dico.keys():
+                        if key in table.text:
+                            g.append(dico.get(key))
+                    if len(g) > 0 :
+                        bd_genres.append(g)
+                    else :
+                        bd_genres.append([0])
+                else:
+                    bd_genres.append([0])
+                # id_genre = content.index("Genre:") + 1
+                # if dico.get(content[id_genre]) is None:
+                #     bd_genres.append(0)
+                # else:
+                #     bd_genres.append(dico.get(content[id_genre]))
+
+                j += 1
+            except:
+                bd_genres.append([0])
+                j += 1
+
+        temp.click()
+        # TODO complete file_path with filename
+        file_path = r"C:\Users\jeronimo\OneDrive - IMT MINES ALES\Documents\3A\Oedeep\cbr_files"
+        wait_download(file_path)
+        after = os.listdir(".\cbr_files")
+        change = set(after) - set(before)
+        if len(change) == 1:
+            file_name = change.pop()
+        else:
+            raise FileNotFoundError("unable to find downloaded file")
+        df = extract_comic(file_name, bd_genres, pages, df)
+        i += 1
 
 
-def genres_nbpages(url):
+
+def genres_nbpages(url, driver):
     page = requests.get(url)
     soup = bs4.BeautifulSoup(page.text, 'html.parser')
     pages = soup.find_all("td", {'width': '175'})
@@ -100,11 +141,12 @@ def genres_nbpages(url):
         nb = t.split('(')[1].split(')')[0]
         nb_pages.append(nb)
         bd_genres.append(gen)
+    print("genres : ", bd_genres)
+    print("nb_pages : ", nb_pages)
     return bd_genres, nb_pages
 
 
-
-def scrap() :
+def scrap(df):
     profile = webdriver.FirefoxProfile()
     profile.set_preference("browser.download.folderList", 2)
     profile.set_preference("browser.download.dir",
@@ -113,38 +155,42 @@ def scrap() :
     login(driver)
 
     dico = get_dico_genres(driver)
-    for i in range(1,35):
-        get_files_by_genre(i,driver)
-
+    for i in range(1, 35):
+        get_files_by_genre(i, driver, dico, df)
 
     driver.close()
 
 
-def extract_comic(filename, bd_genres, pages):
+def extract_comic(filename, bd_genres, pages, df):
+    print("extract comic :", filename)
     global id
-    global df
     command = '7z e ".\cbr_files\\' + filename + '" -o".\extraction" -y'
     subprocess.run(
         command,
         shell=True)
-    del_files()
     mypath = r'C:\Users\jeronimo\OneDrive - IMT MINES ALES\Documents\3A\Oedeep\extraction'
     onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
     i = 0
     for file in onlyfiles:
         if file.endswith(".jpg"):
-            destination = ".\jpg_files\\" + str(id)
-            os.rename(file, destination)
-            id += 1
-            i += 1
+            source = r'C:\Users\jeronimo\OneDrive - IMT MINES ALES\Documents\3A\Oedeep\extraction\%s' %file
+            name = str(id)+".jpg"
+            destination = r'C:\Users\jeronimo\OneDrive - IMT MINES ALES\Documents\3A\Oedeep\jpg_files\%s' %name
+
+            os.rename(source, destination)
+
             genre = get_genre(i, bd_genres, pages)
             new_row = pd.Series({"id_img": id, "labels": genre})
-            df = pd.concat([df, new_row.to_frame().T], ignore_index = True)
+            df = pd.concat([df, new_row.to_frame().T], ignore_index=True)
+            id += 1
+            i += 1
+    del_files()
+    return df
 
 
 def get_genre(i, bd_genres, pages):
     for j in pages:
-        if pages[0] <= i and i <= pages[1]:
+        if j[0] <= i and i <= j[1]:
             return bd_genres[pages.index(j)]
 
 
@@ -152,18 +198,32 @@ def del_files():
     mypath = r'C:\Users\jeronimo\OneDrive - IMT MINES ALES\Documents\3A\Oedeep\cbr_files'
     onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
     for file in onlyfiles:
-        os.remove(file)
+        os.remove(os.path.join(mypath,file))
+    mypath = r'C:\Users\jeronimo\OneDrive - IMT MINES ALES\Documents\3A\Oedeep\extraction'
+    onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+    for file in onlyfiles:
+        os.remove(os.path.join(mypath, file))
 
 
-def wait_download(file_path):
-    while not os.path.exists(file_path):
+def wait_download(directory, timeout=100):
+    seconds = 0
+    dl_wait = True
+    while dl_wait and seconds < timeout:
         time.sleep(1)
+        files = os.listdir(directory)
 
-    if os.path.isfile(file_path):
-        pass
-    else:
-        raise ValueError("%s isn't a file!" % file_path)
-scrap()
+        for fname in files:
+            if fname.endswith('.cbr') or fname.endswith('.cbz'):
+                dl_wait = False
+        for fname in files:
+            if fname.endswith('.part'):
+                dl_wait = True
+        seconds += 1
+        print(seconds)
+    return seconds
+
+
+scrap(df)
 df.to_csv("labels.csv")
 """'
 url = "https://digitalcomicmuseum.com/index.php?dlid="
