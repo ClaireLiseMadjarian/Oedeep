@@ -10,7 +10,7 @@ from os.path import isfile, join
 import subprocess
 import pandas as pd
 
-id = 0
+id = (0)
 df = pd.DataFrame(columns=["id_img", "labels"])
 
 
@@ -75,11 +75,22 @@ def get_files_by_genre(id, driver, dico, df):
         bd_genres, pages = [], []
         j = 1
         nb_pages = 1
+        nb_block = 2
+        while True:
+            try :
+                block = driver.find_element(By.XPATH,   '/html/body/table[2]/tbody/tr/td/div[1]/div[' + str(nb_block)+']')
+                if "Grand Comic Database" in block.text :
+                    break;
+                else :
+                    nb_block += 1
+            except:
+                break
         while True:
             try:
                 table = driver.find_element(By.XPATH,
-                                            "/html/body/table[2]/tbody/tr/td/div[1]/div[2]/table/tbody/tr/td/table/tbody/tr[3]/td/table[" + str(
+                                            "/html/body/table[2]/tbody/tr/td/div[1]/div[" + str(nb_block)+ "]/table/tbody/tr/td/table/tbody/tr[3]/td/table[" + str(
                                                 j) + "]")
+
             except:
                 break
 
@@ -129,6 +140,9 @@ def get_files_by_genre(id, driver, dico, df):
             # raise FileNotFoundError("unable to find downloaded file")
         df = extract_comic(file_name, bd_genres, pages, df)
         i += 1
+    df.to_csv("labels.csv", mode = 'a', index=False, header=False)
+    print("finish genre : ", id)
+    print("finish id :", i)
     return df
 
 
@@ -159,7 +173,7 @@ def scrap(df):
     login(driver)
 
     dico = get_dico_genres(driver)
-    for i in range(1, 35):
+    for i in range(1, 39):
         df = get_files_by_genre(i, driver, dico, df)
 
     driver.close()
@@ -175,7 +189,7 @@ def extract_comic(filename, bd_genres, pages, df):
         shell=True)
     mypath = r'C:\Users\jeronimo\OneDrive - IMT MINES ALES\Documents\3A\Oedeep\extraction'
     onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
-    i = 0
+    i = 1
     for file in onlyfiles:
         if file.endswith(".jpg"):
             source = r'C:\Users\jeronimo\OneDrive - IMT MINES ALES\Documents\3A\Oedeep\extraction\%s' %file
@@ -185,7 +199,9 @@ def extract_comic(filename, bd_genres, pages, df):
             os.rename(source, destination)
 
             genre = get_genre(i, bd_genres, pages)
-            new_row = pd.Series({"id_img": id, "labels": genre})
+            if genre is None :
+                genre = [0]
+            new_row = pd.Series({"id_img": id, "labels": genre[0]})
             df = pd.concat([df, new_row.to_frame().T], ignore_index=True)
             id += 1
             i += 1
@@ -210,7 +226,7 @@ def del_files():
         os.remove(os.path.join(mypath, file))
 
 
-def wait_download(directory, timeout=120):
+def wait_download(directory, timeout=175):
     seconds = 0
     dl_wait = True
     while dl_wait and seconds < timeout:
@@ -228,8 +244,8 @@ def wait_download(directory, timeout=120):
     return seconds
 
 
-scrap(df)
-df.to_csv("labels.csv")
+df = scrap(df)
+df.to_csv("labels.csv", mode = 'a', index=False, header=False)
 """'
 url = "https://digitalcomicmuseum.com/index.php?dlid="
 for i in range(50000):
