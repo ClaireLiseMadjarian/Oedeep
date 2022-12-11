@@ -12,7 +12,7 @@ import pandas as pd
 
 id = (0)
 df = pd.DataFrame(columns=["id_img", "labels"])
-
+df.to_csv("labels.csv")
 
 def get_dico_genres(driver):
     dico = {}
@@ -114,11 +114,7 @@ def get_files_by_genre(id, driver, dico, df):
                         bd_genres.append([0])
                 else:
                     bd_genres.append([0])
-                # id_genre = content.index("Genre:") + 1
-                # if dico.get(content[id_genre]) is None:
-                #     bd_genres.append(0)
-                # else:
-                #     bd_genres.append(dico.get(content[id_genre]))
+
 
                 j += 1
             except:
@@ -126,7 +122,7 @@ def get_files_by_genre(id, driver, dico, df):
                 j += 1
 
         temp.click()
-        # TODO complete file_path with filename
+
         file_path = r"C:\Users\jeronimo\OneDrive - IMT MINES ALES\Documents\3A\Oedeep\cbr_files"
         wait_download(file_path)
         after = os.listdir(".\cbr_files")
@@ -246,14 +242,4 @@ def wait_download(directory, timeout=175):
 
 df = scrap(df)
 df.to_csv("labels.csv", mode = 'a', index=False, header=False)
-"""'
-url = "https://digitalcomicmuseum.com/index.php?dlid="
-for i in range(50000):
-    new_url = url + str(i)
-    driver.get(url)
-    temp = driver.findElement(By.xpath("//img[@src='/images/download.gif']"))
-# element = driver.find_element(By.LINK_TEXT, "index.php?cid=962")
-# element.send_keys( Keys.ARROW_DOWN)
-#print(driver.title)
-"""
-# <a href="index.php?cid=962">DCM Archives and Collections</a> C:\Users\jeronimo\Downloads\000.jpg
+
