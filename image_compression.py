@@ -4,10 +4,6 @@ import stat
 from PIL import Image
 
 
-# imageLue=Image.open("save_jpg/234.jpg")
-# imageComp=imageLue.resize((350,420))
-# imageComp.save("save_jpg/234.jpg")
-
 
 
 def compress_images(directory=False):
